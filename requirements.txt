@@ -1,0 +1,4 @@
+Django==1.9.1
+gunicorn==19.4.5
+dropbox==4.0
+structlog

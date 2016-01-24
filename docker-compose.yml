@@ -1,0 +1,20 @@
+db:
+  image: postgres:9.4.5
+  ports:
+    - '5432:5432'
+
+backup:
+  build: .
+  volumes:
+    - ./:/usr/src/app
+  environment:
+    - BACKUP_CLOUD_LIST={
+                        "dropbox":{"DROP_BOX_AUTH_TOKEN":"YnSZmhwIVZkAAAAAAAAIelW-b8PYZ_7sY0UUNnIQ5h_68AjihpMgmhv9xMXD9vLc",
+                                    "path":"/Apps/"
+                                    },
+                        "googledriver":{"drive_api":"james"}
+                        }
+  links:
+    - db:db
+  ports:
+    - 7000:80
