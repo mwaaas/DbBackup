@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import json
+import sys
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -38,7 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core'
+    'core',
+    'dbbackup',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,12 +80,12 @@ WSGI_APPLICATION = 'PostgresDb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Internationalization
@@ -110,9 +113,43 @@ POSTGRES_USER = os.environ.get('DB_ENV_POSTGRES_USER', "postgres")
 POSTGRES_PASSWORD= os.environ.get('DB_ENV_POSTGRES_PASSWORD', False)
 POSTGRES_DB = os.environ.get('DB_ENV_POSTGRES_DB', POSTGRES_USER)
 # db host environment DB_PORT_5432_TCP_ADDR
-POSTGRES_HOST = 'db'
+POSTGRES_HOST = os.environ.get('DB_HOST', 'db')
 POSTGRES_PORT = os.environ.get('DB_PORT_5432_TCP_PORT')
 
 
-# ********* BACKUP_CLOUD_LIST CONFIGURATION ******************
-BACKUP_CLOUD_LIST = json.loads(os.environ['BACKUP_CLOUD_LIST'])
+# ********* STORAGE CONFIGURATION ******************
+DBBACKUP_STORAGE = 'dbbackup.storage.dropbox_storage'
+DBBACKUP_TOKENS_FILEPATH = os.environ.get('DBBACKUP_TOKENS_FILEPATH')
+DBBACKUP_DROPBOX_APP_KEY = os.environ.get('DBBACKUP_DROPBOX_APP_KEY')
+DBBACKUP_DROPBOX_APP_SECRET = os.environ.get('DBBACKUP_DROPBOX_APP_SECRET')
+
+
+# ********** POSTGRES BACKUP COMMAND ***************
+command = "pg_restore --verbose --clean --no-acl --no-owner" \
+              " -h {host}  -p {port}  -U {username} -d {db_name}"
+
+if POSTGRES_PASSWORD:
+        command = 'PGPASSWORD={password} ' + command
+
+
+
+# database_url = postgres://postgres:mysecretpassword@db:5432/slash_air'
+# postgres://USER:PASSWORD@HOST:PORT/NAME
+
+if not os.environ.get('DATABASE_URL'):
+    database_url = "postgres://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}".format(
+        USER=POSTGRES_USER, PASSWORD=POSTGRES_PASSWORD, PORT=POSTGRES_PORT,
+            HOST=POSTGRES_HOST, NAME=POSTGRES_DB
+    )
+    os.environ['DATABASE_URL'] = database_url
+
+
+#DBBACKUP_FORCE_ENGINE = 'postgresql_psycopg2'
+
+DBBACKUP_DATABASES = {
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+}
+
+#import pdb; pdb.set_trace()
+
+

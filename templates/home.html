@@ -10,5 +10,10 @@
         <button type='submit'>Backup</button>
     </form>
 
+    <div>
+        {% for file_name in backup_list %}
+            <li> {{ file_name }}  <a href="{% url 'index' %}?path={{ file_name }}">Restore this db backup</a> </li>
+        {% endfor %}
+    </div>
 </body>
 </html>

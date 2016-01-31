@@ -1,36 +1,54 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.shortcuts import render
-from .backup_restore_db import backup
-from .dropbox.upload_download import upload
 from structlog import  get_logger
 from django.conf import settings
-import os
+from .backup_restore_db import restore_db
+from django.core import management
+import copy
+from dbbackup.storage.base import BaseStorage
+
 
 class Home(View):
 
     def get(self, req):
-        return render(req, template_name='home.html')
+        logger = get_logger(__name__)
+        logger.info('request_data', data=req.GET)
+        backup_list = self.list_backups()
+        if req.GET.get('path'):
+            self.restore_db(req.GET['path'])
+
+        return render(req, 'home.html',
+                      {'backup_list': backup_list})
 
     def post(self, req):
-        self.logger = get_logger(__name__).bind(action='backup_request')
-
-        self.logger.info('starting')
-        file_path = backup()
-        self.logger.info('backup_file', path=file_path)
-
-        self.logger.info('starting_upload')
-        upload_response = self.upload_file(file_path)
-        self.logger.info('done_uploading', response=str(upload_response))
+        self.backup_db()
         return self.get(req)
 
-    def upload_file(self, file_path):
-        # At the moment only dropbox is supported
-        backup_cloud_list = settings.BACKUP_CLOUD_LIST
+    @staticmethod
+    def backup_db():
+        previouse_db_configuration = copy.deepcopy(settings.DATABASES)
+        # hack hack !!!!!
+        # its not recommended to alter django settings at runtime
+        # doing this for django-db backup to work even if Database settings has not been defined
+        settings.DATABASES = settings.DBBACKUP_DATABASES
+        management.call_command('dbbackup')
+        settings.DATABASES = previouse_db_configuration
 
-        if backup_cloud_list.get('dropbox'):
-            upload(file_path)
-            os.remove(file_path) if os.path.exists(file_path) else None
-        else:
-            self.logger.warn("only dropbox is supported at the moment")
+    @staticmethod
+    def list_backups():
+        storage = BaseStorage.storage_factory()
+        return storage.list_backups()
 
+
+    @staticmethod
+    def restore_db(file_name):
+        previouse_db_configuration = copy.deepcopy(settings.DATABASES)
+        # hack hack !!!!!
+        # its not recommended to alter django settings at runtime
+        # doing this for django-db backup to work even if Database settings has not been defined
+        settings.DATABASES = settings.DBBACKUP_DATABASES
+        #management.call_command('dbrestore -f {0}'.format(file_name))
+        management.call_command('dbrestore', interactive=False,
+                                filepath=file_name)
+        settings.DATABASES = previouse_db_configuration

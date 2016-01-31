@@ -8,12 +8,10 @@ backup:
   volumes:
     - ./:/usr/src/app
   environment:
-    - BACKUP_CLOUD_LIST={
-                        "dropbox":{"DROP_BOX_AUTH_TOKEN":"YnSZmhwIVZkAAAAAAAAIelW-b8PYZ_7sY0UUNnIQ5h_68AjihpMgmhv9xMXD9vLc",
-                                    "path":"/Apps/"
-                                    },
-                        "googledriver":{"drive_api":"james"}
-                        }
+    - DBBACKUP_STORAGE='dbbackup.storage.dropbox_storage'
+    - DBBACKUP_TOKENS_FILEPATH=/usr/src/app/core/dropbox
+    - DBBACKUP_DROPBOX_APP_KEY=5x04czxuq5phbyc
+    - DBBACKUP_DROPBOX_APP_SECRET=gatqrelizrk823m
   links:
     - db:db
   ports:
