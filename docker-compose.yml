@@ -10,8 +10,8 @@ backup:
   environment:
     - DBBACKUP_STORAGE='dbbackup.storage.dropbox_storage'
     - DBBACKUP_TOKENS_FILEPATH=/usr/src/app/core/dropbox
-    - DBBACKUP_DROPBOX_APP_KEY=5x04czxuq5phbyc
-    - DBBACKUP_DROPBOX_APP_SECRET=gatqrelizrk823m
+    - DBBACKUP_DROPBOX_APP_KEY=*************
+    - DBBACKUP_DROPBOX_APP_SECRET=**********
   links:
     - db:db
   ports:
