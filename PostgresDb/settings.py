@@ -122,7 +122,7 @@ DBBACKUP_STORAGE = 'dbbackup.storage.dropbox_storage'
 DBBACKUP_TOKENS_FILEPATH = os.environ.get('DBBACKUP_TOKENS_FILEPATH')
 DBBACKUP_DROPBOX_APP_KEY = os.environ.get('DBBACKUP_DROPBOX_APP_KEY')
 DBBACKUP_DROPBOX_APP_SECRET = os.environ.get('DBBACKUP_DROPBOX_APP_SECRET')
-
+DROPBOX_ACCESS_TOKEN = os.environ.get('DROPBOX_ACCESS_TOKEN')
 
 # ********** POSTGRES BACKUP COMMAND ***************
 command = "pg_restore --verbose --clean --no-acl --no-owner" \
