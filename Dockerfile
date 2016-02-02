@@ -13,7 +13,6 @@ RUN apt-get update \
 	&& apt-get install -y postgresql-common \
 	&& apt-get install -y \
 		postgresql-client-$PG_MAJOR=$PG_VERSION \
-		postgresql-contrib-$PG_MAJOR=$PG_VERSION \
 	&& rm -rf /var/lib/apt/lists/*
 
 CMD gunicorn --bind=0.0.0.0:80 PostgresDb.wsgi \
