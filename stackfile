@@ -1,0 +1,8 @@
+db-backup:
+  image: 'mwaaas/db_backup:latest'
+  environment:
+    - DBBACKUP_STORAGE=dbbackup.storage.dropbox_storage
+    - DROPBOX_ACCESS_TOKEN=**************
+    - DATABASE_URL="use this url schema https://github.com/kennethreitz/dj-database-url or just link your db to this container with contaniner name as db"
+  ports:
+    - '80:80'
